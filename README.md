@@ -14,8 +14,11 @@ Classes: Malignant (212), Benign (357)
 
 Project Structure
 data/: Contains the dataset files.
+
 notebooks/: Jupyter notebooks with detailed analysis and model development.
+
 models/: Saved models for inference.
+
 src/: Source code for data processing, model training, and evaluation.
 
 README.md: Project documentation.
