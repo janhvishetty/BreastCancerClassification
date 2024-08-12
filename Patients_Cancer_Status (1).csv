@@ -1,0 +1,11 @@
+Patient_Index,Cancer_Status,Prediction_Probability
+1,Not Detected,0.13109705
+2,Carcinogen Detected,0.994822
+3,Carcinogen Detected,0.9298173
+4,Carcinogen Detected,0.99528694
+5,Carcinogen Detected,0.85676193
+6,Carcinogen Detected,0.9929416
+7,Not Detected,0.06577073
+8,Not Detected,0.4222292
+9,Not Detected,0.07321798
+10,Carcinogen Detected,0.67391914

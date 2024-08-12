@@ -1,0 +1,175 @@
+import tensorflow as tf
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Conv1D, MaxPool1D, Flatten, Dense, Dropout, BatchNormalization
+from tensorflow.keras.optimizers import Adam
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn import datasets, metrics
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Set seed for Python's random module
+np.random.seed(42)
+tf.random.set_seed(42)
+random.seed(42)
+
+# Load breast cancer dataset
+cancerData = datasets.load_breast_cancer()
+
+# Create DataFrame
+X = pd.DataFrame(data=cancerData.data, columns=cancerData.feature_names)
+y = cancerData.target
+
+# Split the data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, stratify=y)
+
+# Scale the data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Reshape data for Conv1D
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
+
+# Build the model
+model = Sequential([
+    Conv1D(filters=16, kernel_size=2, activation='relu', input_shape=(30, 1)),
+    BatchNormalization(),
+    Dropout(0.2),
+    Conv1D(32, 2, activation='relu'),
+    BatchNormalization(),
+    Dropout(0.2),
+    Flatten(),
+    Dense(32, activation='relu'),
+    Dropout(0.2),
+    Dense(1, activation='sigmoid')
+])
+
+model.summary()
+model.compile(optimizer=Adam(learning_rate=0.0001), loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(X_train, y_train, epochs=35, verbose=1, validation_data=(X_test, y_test))
+
+def plotLearningCurve(history, epochs):
+    epochRange = range(1, epochs + 1)
+    plt.plot(epochRange, history.history['accuracy'])
+    plt.plot(epochRange, history.history['val_accuracy'])
+    plt.title('Model Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+    plt.plot(epochRange, history.history['loss'])
+    plt.plot(epochRange, history.history['val_loss'])
+    plt.title('Model Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+
+plotLearningCurve(history, 35)
+
+# Further training if needed
+history = model.fit(X_train, y_train, epochs=20, validation_data=(X_test, y_test), batch_size=32)
+y_pred_probs = model.predict(X_test)
+y_pred = (y_pred_probs > 0.5).astype(int).reshape(-1)
+
+# Evaluate predictions
+accuracy = metrics.accuracy_score(y_test, y_pred)
+conf_matrix = metrics.confusion_matrix(y_test, y_pred)
+classification_report = metrics.classification_report(y_test, y_pred)
+
+print(f'Accuracy: {accuracy}')
+print('Confusion Matrix:')
+print(conf_matrix)
+print('Classification Report:')
+print(classification_report)
+
+# Load patient data from CSV
+patients_data = pd.read_csv('synthetic_patients (1).csv')  # Replace with the correct path to your CSV file
+
+# Ensure the patient data has the correct number of features
+assert patients_data.shape[1] == 30, "The patient data should have 30 features"
+
+# Preprocess patient data
+X_patients = scaler.transform(patients_data)
+
+# Reshape the data to match the input shape expected by the model
+X_patients = X_patients.reshape(X_patients.shape[0], X_patients.shape[1], 1)
+
+# Predict cancer status for patients
+y_pred_probs_patients = model.predict(X_patients)
+
+# Set a threshold to classify patients
+threshold = 0.5
+y_pred_patients = (y_pred_probs_patients > threshold).astype(int).reshape(-1)
+
+# Create a DataFrame to store the results with prediction probabilities
+result_df = pd.DataFrame({
+    'Patient_Index': range(1, len(y_pred_patients) + 1),
+    'Cancer_Status': np.where(y_pred_patients == 1, 'Carcinogen Detected', 'Not Detected'),
+    'Prediction_Probability': y_pred_probs_patients.flatten()  # flatten to convert to 1D array
+})
+
+# Display the result DataFrame
+print("Predicted Cancer Status for Patients:")
+print(result_df)
+
+# Optionally, save the result to a CSV file
+result_df.to_csv('Patients_Cancer_Status.csv', index=False)
+
+
+
+patient_names = ['Ramakant Yadav', 'Suresh Gupta', 'Anita Sharma', 'Sunita Singh', 'Rajesh Kumar']
+patient_locations = ['Ambernath[1]', 'Dombivali[2]', 'Thane[3]', 'Mulund[4]', 'Dadar[5]']
+
+# Extend these lists to match the number of patients
+num_patients = len(result_df)
+patient_names_extended = (patient_names * (num_patients // len(patient_names) + 1))[:num_patients]
+patient_locations_extended = (patient_locations * (num_patients // len(patient_locations) + 1))[:num_patients]
+
+# Add to DataFrame
+result_df['Name'] = patient_names_extended
+result_df['Location'] = patient_locations_extended
+
+# Assign hospitals based on closest location
+location_to_hospital_map = {
+    'Ambernath[1]': 'Aims Hospital Dombivali',
+    'Dombivali[2]': 'Aims Hospital Dombivali',
+    'Thane[3]': 'Aims Hospital Dombivali',
+    'Mulund[4]': 'KEM Hospital',
+    'Dadar[5]': 'KEM Hospital'
+}
+
+# Function to conditionally assign hospital
+def assign_hospital(row):
+    if row['Cancer_Status'] == 'Carcinogen Detected':
+        return location_to_hospital_map[row['Location']]
+    else:
+        return 'No Treatment Required'
+
+result_df['Hospital'] = result_df.apply(assign_hospital, axis=1)
+
+# Display the result DataFrame
+print("Predicted Cancer Status for Patients:")
+print(result_df)
+
+# Optionally, save the result to a CSV file
+result_df.to_csv('Patients_Cancer_Status_with_Names_Locations_Hospitals.csv', index=False)
+
+# Create a DataFrame for all the "Carcinogen Detected" patients
+carcinogen_detected_df = result_df[result_df['Cancer_Status'] == 'Carcinogen Detected']
+
+
+
+print("Carcinogen Detected Patients:")
+print(carcinogen_detected_df)
+
+carcinogen_detected_df.to_csv('Carcinogen_Detected_Patients.csv', index=False)
