@@ -21,7 +21,7 @@ models/: Saved models for inference.
 
 src/: Source code for data processing, model training, and evaluation.
 
-README.md: Project documentation.
+
 Key Features
 Data Preprocessing: Handled missing values, normalized feature values, and split the dataset into training and testing sets.
 Model Architecture: Developed a CNN model with multiple convolutional and pooling layers to extract relevant features from the input data.
