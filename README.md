@@ -26,7 +26,8 @@ The project utilizes the Breast Cancer Wisconsin (Diagnostic) dataset, which inc
 - **Training**: The model was trained using the Adam optimizer with cross-entropy loss as the objective function.
 - **Evaluation**: Assessed model performance using metrics such as accuracy, precision, recall, and F1-score.
 - **Hospital Suggestion Feature**: Implemented a key-value pair system that provides the closest hospital suggestion for patients detected with cancer.
-- **Results**: Achieved an accuracy of **93%** (replace with actual accuracy) on the test set, offering insights into the model's performance and potential areas for enhancement.
+- **Results**: Achieved an accuracy of **93%**
+- on the test set, offering insights into the model's performance and potential areas for enhancement.
 
 ## Future Work
 
