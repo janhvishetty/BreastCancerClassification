@@ -37,4 +37,4 @@ The project utilizes the Breast Cancer Wisconsin (Diagnostic) dataset, which inc
 ## Contributing
 
 Contributions are highly appreciated! Please feel free to submit a Pull Request or open an issue if you have suggestions or improvements.
-
+Google Collab Link to the project: https://colab.research.google.com/drive/1bEkVAjp-Fq2mM4PvheUJelAjABhiS7XI#scrollTo=M7owYocGGhei
